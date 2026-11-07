@@ -1,0 +1,22 @@
+# Python virtual environments & cache
+.venv/
+__pycache__/
+*.py[cod]
+
+# Test & scratch scripts
+blurtest.py
+
+# Model weights & exported binaries (large files)
+*.pt
+*.onnx
+
+# Media & sample video files
+*.mp4
+test_result.jpg
+
+# Documents & data folders
+*.docx
+data/
+results/
+
+runs/
