@@ -29,13 +29,24 @@ frame -> YOLO11n detector -> boxes -> merge with remembered boxes -> Gaussian bl
 
 ## Results
 
-Measured on YOUR CPU NAME, YOUR OS, 300 frames of one clip, single run per row.
+Measured on an Intel Core i7-8665U (8 threads), Ubuntu, Python 3.12, OpenCV 4.14, using a short stock clip (960 px wide): 242 frames after a 10-frame warm-up, single run per row.
 
-PASTE THE TABLE FROM results/results.md HERE
+| Detector | Mean ms/frame | 95th percentile ms | FPS | Avg boxes/frame |
+| --- | --- | --- | --- | --- |
+| YOLO11n PyTorch, imgsz 640 | 66.6 | 93.7 | 15.0 | 1.00 |
+| YOLO11n PyTorch, imgsz 320 | 29.1 | 39.9 | 34.4 | 1.00 |
+| YOLO11n ONNX Runtime, imgsz 320 | 25.3 | 27.3 | 39.5 | 1.00 |
+| Haar face detector (baseline) | 306.1 | 337.8 | 3.3 | 1.40 |
 
-WHAT YOU OBSERVED IN TWO SENTENCES, for example how much faster 320 was than 640, whether ONNX helped, and what the small input size cost for phone detection.
+The YOLO rows detect person, laptop and cell phone; the Haar row detects frontal faces only, so compare speed across rows, not the box counts. Times include only `detect()`, not drawing or display.
 
-The Haar row measures face detection only, so only its speed is comparable with the YOLO rows. I did not measure detection accuracy.
+Lowering the input size from 640 to 320 made YOLO11n about 2.3 times faster (15.0 to 34.4 FPS), and the ONNX Runtime export was a further 13 percent faster per frame (25.3 ms) with a tighter 95th percentile (27.3 ms against 39.9 ms). The Haar baseline was the slowest at 3.3 FPS, probably because it scans the full 960 px frame at many scales. The clip shows one person, so these numbers say nothing about how well phones are detected at each size. I did not measure detection accuracy.
+
+The clip is not included in this repository. It is a free-licence stock video of a woman talking, downloaded from a free stock-video website. To recreate the benchmark, use any similar clip: save it as `data/women_talking.mp4` and run:
+
+```bash
+ffmpeg -y -i data/women_talking.mp4 -t 12 -vf scale=960:-2 -an data/short.mp4
+```
 
 ## Quick start (Ubuntu)
 
@@ -56,9 +67,9 @@ Press `q` to quit. The first run downloads `yolo11n.pt` (about 5 MB).
 python live_blur.py                                        # webcam
 python live_blur.py --source data/short.mp4 --no-show --save assets/demo.mp4   # video file in, blurred video out
 python live_blur.py --imgsz 320                            # faster, misses small objects more
-python record_clip.py --seconds 20                         # record a clip for the benchmark
+python record_clip.py --seconds 20                         # record a clip with your webcam
 python export_onnx.py                                      # create yolo11n.onnx
-python benchmark.py --video data/sample.mp4                # write results/results.md
+python benchmark.py                                        # benchmark on data/short.mp4, writes results/results.md
 ```
 
 | Option | Default | Meaning |
@@ -75,7 +86,6 @@ python benchmark.py --video data/sample.mp4                # write results/resul
 ## Make the demo GIF
 
 ```bash
-ffmpeg -y -i data/street.mp4 -t 12 -vf scale=960:-2 -an data/short.mp4
 mkdir -p assets
 python live_blur.py --source data/short.mp4 --no-show --save assets/demo.mp4
 ffmpeg -y -i assets/demo.mp4 -vf "fps=10,scale=480:-1:flags=lanczos" assets/demo.gif
@@ -87,7 +97,7 @@ ffmpeg -y -i assets/demo.mp4 -vf "fps=10,scale=480:-1:flags=lanczos" assets/demo
 blur_utils.py     blur_box(): clipped Gaussian blur of one rectangle
 detectors.py      YoloDetector and HaarFaceDetector with the same detect(frame) interface
 live_blur.py      main program: video -> detect -> blur -> show / save
-record_clip.py    records the test clip for the benchmark
+record_clip.py    records a test clip with the webcam
 export_onnx.py    exports the model to ONNX
 benchmark.py      times each detector and writes results/results.md
 detect.py         quick check that both detectors run
@@ -120,4 +130,4 @@ assets/           demo GIF
 
 ## Credits
 
-Built with [OpenCV](https://opencv.org/) and [Ultralytics YOLO11](https://docs.ultralytics.com/). Demo clip: "CLIP TITLE" by AUTHOR NAME on Pexels or Pixabay (free licence). I wrote and tested the code myself with AI guidance and the official documentation.
+Built with [OpenCV](https://opencv.org/) and [Ultralytics YOLO11](https://docs.ultralytics.com/). I wrote and tested the code myself with AI guidance and the official documentation.
