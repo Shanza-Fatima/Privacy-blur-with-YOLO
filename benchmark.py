@@ -63,7 +63,7 @@ def cpu_name():
 
 def main():
     p = argparse.ArgumentParser(description="Benchmark the detectors on one clip")
-    p.add_argument("--video", default="data/sample.mp4", help="the clip to test on")
+    p.add_argument("--video", default="data/short.mp4", help="the clip to test on")
     p.add_argument("--frames", type=int, default=300, help="how many frames to measure")
     p.add_argument("--out", default="results/results.md", help="where to write the table")
     args = p.parse_args()

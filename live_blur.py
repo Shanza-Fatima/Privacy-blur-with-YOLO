@@ -14,7 +14,7 @@ def parse_args():
     p.add_argument("--weights", default="yolo11n.pt", help="model file: yolo11n.pt or yolo11n.onnx")
     p.add_argument("--imgsz", type=int, default=640, help="picture size the model sees (320 fast, 640 exact)")
     p.add_argument("--conf", type=float, default=0.25, help="minimum confidence, 0 to 1")
-    p.add_argument("--ksize", type=int, default=99, help="blur strength (odd number, bigger = blurrier)") 
+    p.add_argument("--strength", type=float, default=0.35, help="blur strength as a fraction of the box size (bigger = blurrier)")
     p.add_argument("--save", default=None, help="also write the result to this .mp4 file")
     p.add_argument("--save-fps", type=float, default=15, help="speed of the saved video")
     p.add_argument("--no-show", action="store_true", help="do not open a window")
@@ -58,12 +58,14 @@ def main():
         if not ok:                                                 # video ended, or the camera stopped
             break
 
-        start = time.perf_counter()                                # start the stopwatch
-        tracks = update(tracks, detector.detect(frame))            # merge new detections with remembered boxes
-        boxes = [b for b, _ in tracks]                             # the boxes to blur on this frame
-        for x1, y1, x2, y2 in boxes:                               # for each box (new or remembered)...
-            blur_box(frame, x1, y1, x2, y2, args.ksize)            # ...blur that rectangle
-        elapsed = time.perf_counter() - start                      # stop the stopwatch (seconds)                     # stop the stopwatch (seconds)
+        start = time.perf_counter()
+        tracks = update(tracks, detector.detect(frame))
+        boxes = [b for b, _ in tracks]
+        for x1, y1, x2, y2 in boxes:
+            side = max(x2 - x1, y2 - y1)
+            k = min(max(int(side * args.strength), 15), 201)
+            blur_box(frame, x1, y1, x2, y2, k)
+        elapsed = time.perf_counter() - start                    # stop the stopwatch (seconds)                     # stop the stopwatch (seconds)
 
         fps_now = 1.0 / elapsed if elapsed > 0 else 0.0            # frames per second = 1 / seconds per frame
         fps_smooth = fps_now if fps_smooth == 0 else 0.9 * fps_smooth + 0.1 * fps_now  # smooth it so the number does not jitter

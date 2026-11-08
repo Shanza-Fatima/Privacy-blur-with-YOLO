@@ -17,6 +17,6 @@ test_result.jpg
 # Documents & data folders
 *.docx
 data/
-results/
 
 runs/
+photo.jpg
