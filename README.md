@@ -51,8 +51,8 @@ ffmpeg -y -i data/women_talking.mp4 -t 12 -vf scale=960:-2 -an data/short.mp4
 ## Quick start (Ubuntu)
 
 ```bash
-git clone https://github.com/Shanza-Fatima/privacy-blur-yolo.git
-cd privacy-blur-yolo
+git clone https://github.com/Shanza-Fatima/Privacy-blur-with-YOLO.git
+cd Privacy-blur-with-YOLO
 python3 -m venv .venv && source .venv/bin/activate
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 pip install -r requirements.txt
